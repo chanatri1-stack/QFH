@@ -1,1 +1,539 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Калькулятор QFH антенны</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 16px 14px 40px;
+      contain: content;
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      text-align: center;
+      margin: 6px 0 16px;
+      color: #58a6ff;
+      font-weight: 700;
+    }
+
+    /* Предупреждение */
+    .warning {
+      background: rgba(210, 153, 34, 0.12);
+      border: 1px solid #d29922;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 0.82rem;
+      color: #e3b341;
+      line-height: 1.4;
+    }
+
+    /* Сетка параметров ввода */
+    .inputs-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .input-group input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px;
+      font-size: 1.1rem;
+      border: 1.5px solid #30363d;
+      border-radius: 8px;
+      background: #0d1117;
+      color: #ffffff;
+      outline: none;
+      transition: border-color 0.15s ease;
+      font-weight: 600;
+    }
+
+    .input-group input:focus {
+      border-color: #58a6ff;
+    }
+
+    .input-hint {
+      font-size: 0.75rem;
+      color: #6e7681;
+      margin-top: 4px;
+    }
+
+    /* Пресеты частот */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .preset-btn {
+      flex: 1 1 calc(50% - 6px);
+      padding: 10px 6px;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      background: #161b22;
+      color: #58a6ff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .preset-btn:active {
+      background: #1f6feb;
+      color: #ffffff;
+    }
+
+    /* Кнопки действий */
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-calc {
+      flex: 2;
+      height: 50px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      background: #238636;
+      color: #ffffff;
+      cursor: pointer;
+    }
+
+    .btn-calc:active {
+      background: #2ea043;
+    }
+
+    .btn-reset {
+      flex: 1;
+      height: 50px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      background: #21262d;
+      color: #c9d1d9;
+      cursor: pointer;
+    }
+
+    /* Секции результатов */
+    .results {
+      display: none;
+      contain: paint;
+    }
+
+    .results.visible {
+      display: block;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #58a6ff;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #21262d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #21262d;
+      font-size: 0.88rem;
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .lbl {
+      color: #8b949e;
+      flex: 1;
+    }
+
+    .val {
+      font-weight: 700;
+      color: #f0f6fc;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .val span {
+      font-size: 0.75rem;
+      color: #8b949e;
+      font-weight: 400;
+      margin-left: 3px;
+    }
+
+    .highlight-blue { color: #58a6ff; }
+    .highlight-green { color: #3fb950; }
+
+    /* Контейнеры чертежей */
+    .diagram-container {
+      width: 100%;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .diagram-container svg {
+      width: 100%;
+      height: auto;
+      max-width: 380px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📡 Калькулятор QFH Антенны</h1>
+
+    <div class="warning">
+      <strong>Точный расчёт по модели Джона Коппенса (0.5 витка, D/H = 0.44).</strong> Значения оптимизированы для приёма сигналов с правой круговой поляризацией (RHCP).
+    </div>
+
+    <!-- Быстрые пресеты -->
+    <div class="presets">
+      <button type="button" class="preset-btn" onclick="setPreset(137.5)">NOAA APT (137.5 МГц)</button>
+      <button type="button" class="preset-btn" onclick="setPreset(137.9)">Метеор LRPT (137.9 МГц)</button>
+      <button type="button" class="preset-btn" onclick="setPreset(145.8)">МКС / ISS (145.8 МГц)</button>
+      <button type="button" class="preset-btn" onclick="setPreset(436.5)">UHF Спутники (436.5 МГц)</button>
+    </div>
+
+    <!-- Параметры антенны -->
+    <div class="inputs-card">
+      <div class="input-group">
+        <label for="freq">Рабочая частота (МГц)</label>
+        <input type="number" id="freq" value="137.5" step="0.05" min="20" max="2500" inputmode="decimal">
+      </div>
+
+      <div class="input-group">
+        <label for="tubeDiam">Внешний диаметр трубки/провода d (мм)</label>
+        <input type="number" id="tubeDiam" value="3.0" step="0.5" min="1" max="25" inputmode="decimal">
+        <div class="input-hint">Обычно 3–4 мм (медный провод) или 6–8 мм (алюминиевая/медная трубка)</div>
+      </div>
+
+      <div class="input-group">
+        <label for="bendRadius">Радиус гиба углов (мм)</label>
+        <input type="number" id="bendRadius" value="5.0" step="1" min="0" max="30" inputmode="decimal">
+        <div class="input-hint">Поправка на скругление на 90° углах</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-calc" onclick="calculate()">РАССЧИТАТЬ</button>
+      <button type="button" class="btn-reset" onclick="resetForm()">СБРОС</button>
+    </div>
+
+    <!-- Блок результатов -->
+    <div class="results" id="results">
+      <!-- Общие данные -->
+      <div class="card">
+        <div class="card-title">Волновые характеристики</div>
+        <div class="row">
+          <span class="lbl">Длина волны в воздухе (λ)</span>
+          <span class="val" id="out-lambda">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Скорректированная волна (λ comp)</span>
+          <span class="val" id="out-lambda-comp">—</span>
+        </div>
+      </div>
+
+      <!-- Большая петля -->
+      <div class="card">
+        <div class="card-title" style="color: #58a6ff;">Большая петля (Larger Loop)</div>
+        
+        <div class="diagram-container">
+          <!-- Векторный чертеж большой петли -->
+          <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="220" fill="#0d1117" rx="8"/>
+            <rect x="153" y="15" width="14" height="190" fill="#21262d" stroke="#30363d"/>
+            <!-- Горизонтальные трубки -->
+            <line x1="60" y1="35" x2="260" y2="35" stroke="#58a6ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="60" y1="185" x2="260" y2="185" stroke="#58a6ff" stroke-width="4" stroke-linecap="round"/>
+            <!-- Винтовая линия -->
+            <path d="M 60 35 Q 260 110 260 185" fill="none" stroke="#58a6ff" stroke-width="3" stroke-dasharray="4 2"/>
+            <path d="M 260 35 Q 60 110 60 185" fill="none" stroke="#79c0ff" stroke-width="3.5"/>
+            <!-- Размеры стрелки -->
+            <line x1="45" y1="35" x2="45" y2="185" stroke="#8b949e" stroke-width="1.5"/>
+            <text x="35" y="115" fill="#8b949e" font-size="12" text-anchor="end" font-weight="bold">H1</text>
+            <line x1="60" y1="202" x2="260" y2="202" stroke="#8b949e" stroke-width="1.5"/>
+            <text x="160" y="216" fill="#8b949e" font-size="12" text-anchor="middle" font-weight="bold">D1 / Dc1</text>
+          </svg>
+        </div>
+
+        <div class="row">
+          <span class="lbl">Полная длина провода (L1)</span>
+          <span class="val highlight-blue" id="out-l1">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Высота антенны (H1)</span>
+          <span class="val highlight-blue" id="out-h1">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Горизонтальное расстояние (D1)</span>
+          <span class="val highlight-blue" id="out-d1">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Скорректированное гориз. (Dc1)</span>
+          <span class="val" id="out-dc1">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Винтовая спиральная трубка (S1)</span>
+          <span class="val" id="out-s1">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Скорректированная спираль (Sc1)</span>
+          <span class="val" id="out-sc1">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Внутренний диаметр (Di1)</span>
+          <span class="val" id="out-di1">—</span>
+        </div>
+      </div>
+
+      <!-- Малая петля -->
+      <div class="card">
+        <div class="card-title" style="color: #3fb950;">Малая петля (Smaller Loop)</div>
+
+        <div class="diagram-container">
+          <!-- Векторный чертеж малой петли -->
+          <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="220" fill="#0d1117" rx="8"/>
+            <rect x="153" y="20" width="14" height="180" fill="#21262d" stroke="#30363d"/>
+            <!-- Горизонтальные трубки -->
+            <line x1="70" y1="40" x2="250" y2="40" stroke="#3fb950" stroke-width="4" stroke-linecap="round"/>
+            <line x1="70" y1="180" x2="250" y2="180" stroke="#3fb950" stroke-width="4" stroke-linecap="round"/>
+            <!-- Винтовая линия -->
+            <path d="M 70 40 Q 250 110 250 180" fill="none" stroke="#2ea043" stroke-width="3" stroke-dasharray="4 2"/>
+            <path d="M 250 40 Q 70 110 70 180" fill="none" stroke="#56d364" stroke-width="3.5"/>
+            <!-- Размеры стрелки -->
+            <line x1="55" y1="40" x2="55" y2="180" stroke="#8b949e" stroke-width="1.5"/>
+            <text x="45" y="115" fill="#8b949e" font-size="12" text-anchor="end" font-weight="bold">H2</text>
+            <line x1="70" y1="198" x2="250" y2="198" stroke="#8b949e" stroke-width="1.5"/>
+            <text x="160" y="214" fill="#8b949e" font-size="12" text-anchor="middle" font-weight="bold">D2 / Dc2</text>
+          </svg>
+        </div>
+
+        <div class="row">
+          <span class="lbl">Полная длина провода (L2)</span>
+          <span class="val highlight-green" id="out-l2">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Высота антенны (H2)</span>
+          <span class="val highlight-green" id="out-h2">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Горизонтальное расстояние (D2)</span>
+          <span class="val highlight-green" id="out-d2">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Скорректированное гориз. (Dc2)</span>
+          <span class="val" id="out-dc2">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Винтовая спиральная трубка (S2)</span>
+          <span class="val" id="out-s2">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Скорректированная спираль (Sc2)</span>
+          <span class="val" id="out-sc2">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Внутренний диаметр (Di2)</span>
+          <span class="val" id="out-di2">—</span>
+        </div>
+      </div>
+
+      <!-- Схема запитки и подключения -->
+      <div class="card">
+        <div class="card-title">Схема подключения (RHCP)</div>
+        <div class="diagram-container">
+          <svg viewBox="0 0 340 180" xmlns="http://www.w3.org/2000/svg">
+            <rect width="340" height="180" fill="#0d1117" rx="8"/>
+            <circle cx="170" cy="90" r="30" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+            <!-- Выводы малой петли (Small) -->
+            <line x1="170" y1="20" x2="170" y2="70" stroke="#3fb950" stroke-width="4"/>
+            <text x="170" y="15" fill="#3fb950" font-size="11" text-anchor="middle" font-weight="bold">Малая (Small)</text>
+            <line x1="170" y1="110" x2="170" y2="160" stroke="#3fb950" stroke-width="4"/>
+            <!-- Выводы большой петли (Large) -->
+            <line x1="40" y1="90" x2="150" y2="90" stroke="#58a6ff" stroke-width="4"/>
+            <text x="35" y="94" fill="#58a6ff" font-size="11" text-anchor="end" font-weight="bold">Большая</text>
+            <line x1="190" y1="90" x2="300" y2="90" stroke="#58a6ff" stroke-width="4"/>
+            <text x="305" y="94" fill="#58a6ff" font-size="11" text-anchor="start" font-weight="bold">(Large)</text>
+            <!-- Коаксиальный кабель -->
+            <circle cx="170" cy="90" r="6" fill="#f0883e"/>
+            <text x="170" y="105" fill="#8b949e" font-size="9" text-anchor="middle">50 Ом</text>
+          </svg>
+        </div>
+        <div class="row">
+          <span class="lbl">Поляризация</span>
+          <span class="val">Правая круговая (RHCP)</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Симметрирование (Балун)</span>
+          <span class="val">4 витка кабеля RG-58 на трубе</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const C = 299792458; // Скорость света в м/с
+    const RATIO = 0.44;  // Соотношение D / H (классика Коппенса)
+
+    function setPreset(freq) {
+      document.getElementById('freq').value = freq;
+      calculate();
+    }
+
+    function resetForm() {
+      document.getElementById('freq').value = '137.5';
+      document.getElementById('tubeDiam').value = '3.0';
+      document.getElementById('bendRadius').value = '5.0';
+      document.getElementById('results').classList.remove('visible');
+    }
+
+    function fmt(val) {
+      return isNaN(val) ? '—' : val.toFixed(1);
+    }
+
+    function calculate() {
+      const fMHz = parseFloat(document.getElementById('freq').value);
+      const dTube = parseFloat(document.getElementById('tubeDiam').value) || 3.0;
+      const rBend = parseFloat(document.getElementById('bendRadius').value) || 0.0;
+
+      if (!fMHz || fMHz <= 0) {
+        alert('Введите корректную частоту!');
+        return;
+      }
+
+      // Длина волны
+      const lambda = (C / (fMHz * 1e6)) * 1000; // в мм
+      const lambdaComp = lambda * 1.064;         // компенсация по модели Коппенса
+
+      // Резонансные длины петель
+      const L1 = 1.091656 * lambda; // Большая петля
+      const L2 = 1.037392 * lambda; // Малая петля
+
+      // Геометрический делитель для 0.5 витка и D/H = 0.44
+      // L = 2*D + 2*S = 2*r*H + 2*sqrt(H^2 + (pi*r*H/2)^2) = 2*H*(r + sqrt(1 + (pi*r/2)^2))
+      const kGeom = 2 * (RATIO + Math.sqrt(1 + Math.pow((Math.PI * RATIO) / 2, 2)));
+
+      // Высота и диаметры Большой петли
+      const H1 = L1 / kGeom;
+      const D1 = RATIO * H1;
+      const S1 = Math.sqrt(Math.pow(H1, 2) + Math.pow((Math.PI * D1) / 2, 2));
+
+      // Высота и диаметры Малой петли
+      const H2 = L2 / kGeom;
+      const D2 = RATIO * H2;
+      const S2 = Math.sqrt(Math.pow(H2, 2) + Math.pow((Math.PI * D2) / 2, 2));
+
+      // Поправки на изгиб (Bending correction)
+      const bendOffset = rBend > 0 ? (2 * rBend * (1 - Math.PI / 4)) : 0;
+      const Dc1 = D1 - (bendOffset * 2);
+      const Dc2 = D2 - (bendOffset * 2);
+      const Sc1 = S1 - (bendOffset * 2);
+      const Sc2 = S2 - (bendOffset * 2);
+
+      // Внутренние диаметры (между осями трубок)
+      const Di1 = D1 - dTube;
+      const Di2 = D2 - dTube;
+
+      // Вывод общих параметров
+      document.getElementById('out-lambda').innerHTML = fmt(lambda) + '<span>мм</span>';
+      document.getElementById('out-lambda-comp').innerHTML = fmt(lambdaComp) + '<span>мм</span>';
+
+      // Вывод Большой петли
+      document.getElementById('out-l1').innerHTML = fmt(L1) + '<span>мм</span>';
+      document.getElementById('out-h1').innerHTML = fmt(H1) + '<span>мм</span>';
+      document.getElementById('out-d1').innerHTML = fmt(D1) + '<span>мм</span>';
+      document.getElementById('out-dc1').innerHTML = fmt(Dc1) + '<span>мм</span>';
+      document.getElementById('out-s1').innerHTML = fmt(S1) + '<span>мм</span>';
+      document.getElementById('out-sc1').innerHTML = fmt(Sc1) + '<span>мм</span>';
+      document.getElementById('out-di1').innerHTML = fmt(Di1) + '<span>мм</span>';
+
+      // Вывод Малой петли
+      document.getElementById('out-l2').innerHTML = fmt(L2) + '<span>мм</span>';
+      document.getElementById('out-h2').innerHTML = fmt(H2) + '<span>мм</span>';
+      document.getElementById('out-d2').innerHTML = fmt(D2) + '<span>мм</span>';
+      document.getElementById('out-dc2').innerHTML = fmt(Dc2) + '<span>мм</span>';
+      document.getElementById('out-s2').innerHTML = fmt(S2) + '<span>мм</span>';
+      document.getElementById('out-sc2').innerHTML = fmt(Sc2) + '<span>мм</span>';
+      document.getElementById('out-di2').innerHTML = fmt(Di2) + '<span>мм</span>';
+
+      // Показ результатов
+      const res = document.getElementById('results');
+      res.classList.add('visible');
+      res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Инициализация расчета при старте
+    window.addEventListener('DOMContentLoaded', calculate);
+  </script>
+</body>
+</html>
